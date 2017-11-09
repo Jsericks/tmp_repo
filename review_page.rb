@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "httparty"
+require "mechanize"
 
 require_relative "./review_set"
 require_relative "./review"
@@ -14,21 +14,32 @@ class ReviewPage
   def initialize(page_num)
     @page_number = page_num
     @review_set = ReviewSet.new()
-    @page_link = "http://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-review-23685/page#{@page_number}/?filter=ALL_REVIEWS#link"
   end
 
   ##### INSTANCE METHODS #####
+  def client
+    @client ||= Mechanize.new { |agent|
+      agent.user_agent_alias = 'Mac Safari'
+    }
+  end
+
   def retrieve_page
     puts "Fetching Page ##{@page_number}"
-    HTTParty.get(@page_link)
+    puts "Using link: #{page_link}"
+
+    client.get(page_link)
+  end
+
+  def page_link
+    "https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/page#{@page_number}/?filter=ALL_REVIEWS#link"
   end
 
   def parsed_page
-    @parsed_page ||= Nokogiri::HTML.parse(retrieve_page())
+    @parsed_page = retrieve_page
   end
 
   def extract_top_level_nodes
-    parsed_page.css(top_level_node_path)
+    parsed_page.search(top_level_node_path)
   end
 
   def generate_review_set

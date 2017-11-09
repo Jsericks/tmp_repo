@@ -3,7 +3,10 @@
 ##### BUNDLER / RUBYGEMS SETUP ####
 require "rubygems"
 require "bundler/setup"
+
+##### EXTERNAL GEM LOAD #####
 require "table_print"
+require "mechanize"
 
 ##### REQUIRE RELATIVES #####
 require_relative "./review_set"
@@ -24,5 +27,12 @@ def display_reviews(reviews)
   puts
 end
 
-reviews = get_n_pages(2)
+# get_n_pages(1)
 
+a = Mechanize.new { |agent|
+  agent.user_agent_alias = 'Mac Safari'
+}
+
+page = a.get("http://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/page1/?filter=ALL_REVIEWS#link")
+
+pp page.search(".review-entry").first.class
