@@ -3,20 +3,22 @@
 ##### BUNDLER / RUBYGEMS SETUP ####
 require "rubygems"
 require "bundler/setup"
+
+##### EXTERNAL GEM LOAD #####
 require "table_print"
+require "mechanize"
 
 ##### REQUIRE RELATIVES #####
 require_relative "./review_set"
 require_relative "./review_page"
 
-def get_n_pages(n)
-  pages = (1..n).map do |page_num|
+def get_n_pages_take_top_n(page_total, return_total)
+  pages = (1..page_total).map do |page_num|
     page = ReviewPage.new(page_num)
   end
   full_review_set = ReviewSet.merge_review_sets(pages.map{|rp| rp.generate_review_set })
-  puts "REVIEW COUNT #{full_review_set.reviews.size}"
-  top_three = full_review_set.bottom_n_reviews(30)
-  display_reviews(top_three)
+  top_n = full_review_set.top_n_reviews(return_total)
+  display_reviews(top_n)
 end
 
 def display_reviews(reviews)
@@ -24,5 +26,4 @@ def display_reviews(reviews)
   puts
 end
 
-reviews = get_n_pages(2)
-
+get_n_pages_take_top_n(5, 500)

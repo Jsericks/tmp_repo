@@ -24,6 +24,6 @@ class Review
   end
 
   def set_review_content(nodes)
-    @review_content = nodes.css("div.review-wrapper>p.review-content")&.first.content
+    @review_content = nodes.css("p.review-content")&.first.content
   end
 end

@@ -14,27 +14,30 @@ class ReviewSet
   ##### ATTR ACCESSORS #####
   attr_accessor :reviews
 
+  ##### CLASS METHODS #####
   def self.merge_review_sets(review_sets)
     rs = self.new()
     review_sets.each do |r|
       rs.reviews.push(r.reviews).flatten!
     end
-    return rs
+    rs
   end
 
   ##### INIT #####
   def initialize
     Sentimentalizer.setup
     @reviews = []
+    @sorted = false
   end
 
   ##### INSTANCE METHODS #####
   def add_review(review)
     @reviews.push(analyze_and_set_dispostion(review))
+    @sorted = false
   end
 
   def analyze_and_set_dispostion(review)
-    analysis = analyze(review.review_content)
+    analysis = analyze("#{review.title} #{review.review_content}".downcase)
     review.disposition = SENTIMENT_MAP[analysis.sentiment]
     review.disposition_score = analysis.overall_probability.to_f
     review
@@ -45,11 +48,13 @@ class ReviewSet
   end
 
   def top_n_reviews(n)
-    @reviews.sort_by{ |a| a&.disposition_score }.take(n)
+    sort_reviews unless @sorted
+    @reviews.take(n)
   end
 
-  def bottom_n_reviews(n)
-    @reviews.sort_by{ |a| a&.disposition_score }.reverse.take(n)
+  def sort_reviews
+    @reviews.sort_by!{ |a| -a&.disposition_score }
+    @sorted = true
   end
 
   def score_reviews
